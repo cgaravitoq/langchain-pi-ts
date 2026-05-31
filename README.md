@@ -85,6 +85,27 @@ Or pass a fully custom registry via `new ChatPi({ provider, modelId, registry })
 - `bridgeOpencodeAuth(authStorage, authPath?)` / `readOpencodeKey(authPath?)` — opt-in opencode key bridge.
 - `buildContext`, `toPiTool`, `applyStop`, `usageMetadata`, `responseMetadata` — LangChain ↔ pi-ai mappers for advanced use.
 
+## Native opencode/Zen (no Pi)
+
+For [OpenCode Zen](https://opencode.ai/docs/zen/) you don't need Pi at all — it's
+an OpenAI-compatible endpoint. The `langchain-pi-ts/opencode` subpath ships a
+`ChatOpencode` (a thin `ChatOpenAI` subclass) that points at it and reads the key
+opencode auto-provisions into `~/.local/share/opencode/auth.json`. Requires
+`@langchain/openai` (optional peer dependency).
+
+```ts
+import { ChatOpencode } from "langchain-pi-ts/opencode";
+
+// Free models work with no key (anonymous IP-limited trial):
+const free = new ChatOpencode({ model: "deepseek-v4-flash-free" });
+
+// A key (auto-read, or OPENCODE_API_KEY / apiKey) unlocks paid models + higher limits:
+const paid = new ChatOpencode({ model: "glm-5" });
+const go = new ChatOpencode({ model: "glm-5", tier: "go" });
+```
+
+Free models: `deepseek-v4-flash-free`, `big-pickle`, `mimo-v2.5-free`, `nemotron-3-super-free`.
+
 ## Notes
 
 - **ESM + Node only.** pi-ai and pi-coding-agent are ESM-only and Node-native; this package cannot run from CommonJS `require()` or in browser/edge runtimes.
