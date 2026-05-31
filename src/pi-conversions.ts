@@ -64,8 +64,6 @@ const zeroUsage: Usage = {
   cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
 };
 
-// pi-ai wants JSON Schema (TypeBox already emits it); convertToOpenAITool turns
-// any Zod/LangChain tool into JSON Schema, so the cast to TSchema is wire-safe.
 export const toPiTool = (tool: BindToolsInput): Tool => {
   const { function: fn } = convertToOpenAITool(tool);
   return {
