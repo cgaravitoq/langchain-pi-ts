@@ -5,8 +5,8 @@ A LangChain [`BaseChatModel`](https://js.langchain.com/) adapter for
 Use **Pi** — and any provider, model and credential it resolves — from LangChain
 and LangGraph, with native tool calling and streaming.
 
-> The TypeScript half of a pair. A Python twin (`langchain-pi`) is planned so the
-> same Pi configuration can be reused from LangChain/LangGraph in Python too.
+> The TypeScript half of a pair. A Python twin (`langchain-pi`) reuses the same
+> Pi configuration from LangChain/LangGraph in Python.
 
 ## Install
 
@@ -63,51 +63,28 @@ for await (const chunk of await model.stream("Write a haiku.")) {
 ### Credentials
 
 Models and credentials resolve through pi-coding-agent's `ModelRegistry` /
-`AuthStorage`. Any provider authenticated in `~/.pi` works with no key. By default
-`ChatPi` lazily builds a shared registry on first use (importing the package
-touches no filesystem). Inject your own to customize:
+`AuthStorage`. Any provider authenticated in `~/.pi` works with no key. `ChatPi`
+lazily builds a shared registry on first use (importing the package touches no
+filesystem); pass a custom one via `new ChatPi({ provider, modelId, registry })`,
+or `getDefaultAuthStorage().setRuntimeApiKey(provider, key)` to inject a key.
 
-```ts
-import { ChatPi, getDefaultAuthStorage, bridgeOpencodeAuth } from "langchain-pi-ts";
-
-// Opt-in: bridge the opencode CLI's Zen key into the default auth storage.
-bridgeOpencodeAuth(getDefaultAuthStorage());
-
-const model = new ChatPi({ provider: "opencode", modelId: "deepseek-v4-flash-free" });
-```
-
-Or pass a fully custom registry via `new ChatPi({ provider, modelId, registry })`.
-
-## API
-
-- `ChatPi` — the chat model. Fields: `provider`, `modelId`, `reasoning?`, `system?`, `registry?`.
-- `getDefaultRegistry()` / `getDefaultAuthStorage()` — lazy, memoized defaults.
-- `bridgeOpencodeAuth(authStorage, authPath?)` / `readOpencodeKey(authPath?)` — opt-in opencode key bridge.
-- `buildContext`, `toPiTool`, `applyStop`, `usageMetadata`, `responseMetadata` — LangChain ↔ pi-ai mappers for advanced use.
+For OpenCode Zen, prefer the native `ChatOpencode` below.
 
 ## Native opencode/Zen (no Pi)
 
-For [OpenCode Zen](https://opencode.ai/docs/zen/) you don't need Pi at all — it's
-an OpenAI-compatible endpoint. The `langchain-pi-ts/opencode` subpath ships a
-`ChatOpencode` (a thin `ChatOpenAI` subclass) that points at it and reads the key
-opencode auto-provisions into `~/.local/share/opencode/auth.json`. Requires
-`@langchain/openai` (optional peer dependency).
+[OpenCode Zen](https://opencode.ai/docs/zen/) is an OpenAI-compatible endpoint, so
+you don't need Pi. The `langchain-pi-ts/opencode` subpath ships `ChatOpencode`, a
+thin `ChatOpenAI` subclass pointed at it. Requires `@langchain/openai` (optional
+peer dependency).
 
-Free models work **two ways** — with or without an API key:
-
-- **No key** → the anonymous IP-rate-limited trial (works out of the box).
-- **With a key** (auto-read from `auth.json`, or `OPENCODE_API_KEY` / `apiKey`) → higher limits.
-
-Paid models require a key.
+The API key is **optional**: free models work with no key (anonymous, IP-rate-
+limited). For paid models pass a key via `OPENCODE_API_KEY` (env) or `apiKey`.
 
 ```ts
 import { ChatOpencode } from "langchain-pi-ts/opencode";
 
-// Free — no key needed (anonymous), or auto-uses a key if present for higher limits:
-const free = new ChatOpencode({ model: "deepseek-v4-flash-free" });
-
-// Paid — requires a key (auto-read or explicit apiKey):
-const paid = new ChatOpencode({ model: "glm-5" });
+const free = new ChatOpencode({ model: "deepseek-v4-flash-free" }); // no key
+const paid = new ChatOpencode({ model: "glm-5" }); // OPENCODE_API_KEY or apiKey
 const go = new ChatOpencode({ model: "glm-5", tier: "go" });
 ```
 
@@ -115,8 +92,8 @@ Free models: `deepseek-v4-flash-free`, `big-pickle`, `mimo-v2.5-free`, `nemotron
 
 ## Notes
 
-- **ESM + Node only.** pi-ai and pi-coding-agent are ESM-only and Node-native; this package cannot run from CommonJS `require()` or in browser/edge runtimes.
-- **pi-coding-agent weight.** It exposes no subpath for `AuthStorage`/`ModelRegistry`, so importing the package loads its full runtime to reach those two classes. Lazy instantiation defers credential/filesystem work, not the module load.
+- ESM + Node only. pi-ai / pi-coding-agent are ESM-only and Node-native.
+- Tool-call deltas and usage/cost metadata are preserved.
 
 ## License
 
