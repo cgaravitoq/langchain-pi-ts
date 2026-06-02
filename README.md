@@ -21,7 +21,8 @@ and pi-coding-agent).
 ## Usage
 
 `createChat` is the simplest entry — pass a provider and it routes to the right
-backend (`opencode`/`opencode-go` → native Zen, everything else → Pi):
+backend (`opencode`/`opencode-go` → native Zen, `claude-code` → native Anthropic,
+everything else → Pi):
 
 ```ts
 import { createChat } from "langchain-pi-ts";
@@ -29,6 +30,7 @@ import { createChat } from "langchain-pi-ts";
 const free = createChat({ provider: "opencode", model: "deepseek-v4-flash-free" }); // free, no key
 const go = createChat({ provider: "opencode-go", model: "glm-5", apiKey: "..." }); // subscription
 const codex = createChat({ provider: "openai-codex", model: "gpt-5.3-codex-spark" }); // via Pi
+const claude = createChat({ provider: "claude-code", model: "claude-sonnet-4-6" }); // Claude Code subscription
 ```
 
 Or construct a backend directly:
@@ -101,6 +103,32 @@ const go = new ChatOpencode({ model: "glm-5", tier: "go" });
 ```
 
 Free models: `deepseek-v4-flash-free`, `big-pickle`, `mimo-v2.5-free`, `nemotron-3-super-free`.
+
+## Claude Code / Anthropic subscription (no Pi)
+
+`ChatClaudeCode` talks to the Anthropic Messages API (via `@anthropic-ai/sdk`)
+authenticated with the Claude Code OAuth session already on the machine
+(`~/.claude/.credentials.json`), billing requests against your Claude Code
+subscription — no API key. It needs the Claude Code CLI logged in once. The
+`langchain-pi-ts/claude-code` subpath ships it.
+
+```ts
+import { ChatClaudeCode } from "langchain-pi-ts/claude-code";
+
+const chat = new ChatClaudeCode({ model: "claude-sonnet-4-6" });
+const opus = new ChatClaudeCode({ model: "claude-opus-4-8", reasoning: "medium" });
+// or: createChat({ provider: "claude-code", model: "claude-opus-4-8" })
+```
+
+Models: `claude-opus-4-8`, `claude-opus-4-7`, `claude-sonnet-4-6`,
+`claude-haiku-4-5`. Adaptive thinking on Opus 4.8/4.7, a token budget on Sonnet
+4.6 (Haiku has no reasoning). The 1M-context beta is opt-in via
+`longContext: true`; the subscription rejects long-context requests without extra
+credits otherwise. Tool calling and streaming work as with `ChatPi`.
+
+Using a subscription OAuth session from a third-party app may violate Anthropic's
+terms and risk your account — see the
+[`pi-claude-code-auth`](https://github.com/cgaravitoq/pi-claude-code-auth) README.
 
 ## Notes
 
