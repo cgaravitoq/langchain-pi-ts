@@ -1,6 +1,6 @@
 {
   "name": "langchain-pi-ts",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "LangChain BaseChatModel adapter for @earendil-works/pi-ai — use Pi with any provider, model and auth. Includes a native opencode/Zen chat model (no pi).",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -14,6 +14,10 @@
     "./opencode": {
       "types": "./dist/opencode-chat.d.ts",
       "import": "./dist/opencode-chat.js"
+    },
+    "./claude-code": {
+      "types": "./dist/claude-code-chat.d.ts",
+      "import": "./dist/claude-code-chat.js"
     },
     "./package.json": "./package.json"
   },
@@ -50,6 +54,7 @@
     "url": "https://github.com/cgaravitoq/langchain-pi-ts/issues"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
     "@earendil-works/pi-ai": "^0.78.0",
     "@earendil-works/pi-coding-agent": "^0.78.0",
     "@langchain/openai": "^1.4.7"

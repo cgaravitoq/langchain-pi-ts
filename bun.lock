@@ -5,6 +5,7 @@
     "": {
       "name": "langchain-pi-ts",
       "dependencies": {
+        "@anthropic-ai/sdk": "^0.91.1",
         "@earendil-works/pi-ai": "^0.78.0",
         "@earendil-works/pi-coding-agent": "^0.78.0",
         "@langchain/openai": "^1.4.7",
